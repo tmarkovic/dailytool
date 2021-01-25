@@ -1,12 +1,14 @@
+import { Grommet } from 'grommet';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
-
+import Daily from './Daily';
+import { grommet } from 'grommet/themes';
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Grommet theme={grommet} full>
+      <Daily />
+    </Grommet>
   </React.StrictMode>,
   document.getElementById('root')
 );
