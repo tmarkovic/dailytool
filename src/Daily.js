@@ -1,5 +1,5 @@
 import './index.css';
-import { useReducer, useState } from 'react';
+import { useReducer, useState, useEffect } from 'react';
 import {
   Clock,
   Box,
@@ -8,9 +8,10 @@ import {
   Main,
   FormField,
   Text,
-  List,
+  Heading,
   Avatar,
 } from 'grommet';
+import { PauseFill, PlayFill } from 'grommet-icons';
 import { Add } from 'grommet-icons';
 
 const initialState = {
@@ -21,22 +22,24 @@ const initialState = {
 function reducer(state, { type, payload }) {
   switch (type) {
     case 'addName':
-      const newState = payload.includes(',')
-        ? [
-            ...state.names,
-            ...payload
-              .split(',')
-              .map((x) => ({ name: x.trim(), selected: false })),
-          ]
-        : [...state.names, { name: payload, selected: false }];
       return {
         ...state,
-        names: newState,
+        names: [...state.names, { name: payload.trim(), selected: false }],
+      };
+    case 'addNames':
+      return {
+        ...state,
+        names: [...state.names, ...payload],
       };
     case 'removeName':
       return {
         ...state,
         names: state.names.filter((x) => x.name !== payload),
+      };
+    case 'resetNames':
+      return {
+        ...state,
+        names: [],
       };
     case 'startCount':
       return {
@@ -58,14 +61,40 @@ function Daily(props) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [name, setName] = useState('');
 
-  console.log(state.toggledNames);
   const handleChangeName = (event) => {
     setName(event.target.value);
   };
 
+  useEffect(() => {
+    async function fetchNames(binId) {
+      const res = await fetch(`https://api.jsonbin.io/b/${binId}`).then((x) =>
+        x.json()
+      );
+      dispatch({
+        type: 'addNames',
+        payload: res.names
+          .map((name) => ({ name, selected: false }))
+          .sort(() => 0.5 - Math.random()),
+      });
+    }
+
+    const id = window.location.pathname;
+    if (id.length > 1) {
+      fetchNames('601268d49f55707f6dfd1b22');
+    }
+  }, []);
+
   const handleAddName = (e) => {
     e.preventDefault();
-    dispatch({ type: 'addName', payload: name });
+    if (name.includes(',')) {
+      const names = name
+        .split(',')
+        .map((x) => ({ name: x.trim(), selected: false }))
+        .sort(() => 0.5 - Math.random());
+      dispatch({ type: 'addNames', payload: names });
+    } else {
+      dispatch({ type: 'addName', payload: name });
+    }
     setName('');
   };
 
@@ -75,7 +104,6 @@ function Daily(props) {
 
   return (
     <Main pad="small" fill align="center">
-      <h1>DailyTool</h1>
       <Box direction="row">
         <Box direction="column" width="medium">
           <p>Participants</p>
@@ -92,23 +120,6 @@ function Daily(props) {
               ></Button>
             </Box>
           </form>
-          <List data={state.names} border={false}>
-            {({ name }) => (
-              <Box
-                direction="row-responsive"
-                gap="small"
-                align="center"
-                onClick={() => handleRemoveName(name)}
-              >
-                <Avatar
-                  src={`https://avatars.dicebear.com/4.5/api/gridy/${name}.svg`}
-                  alt="avatar"
-                  background="brand"
-                />
-                <Text weight="bold">{name}</Text>
-              </Box>
-            )}
-          </List>
         </Box>
         <Box>
           <p>Timer</p>
@@ -123,20 +134,80 @@ function Daily(props) {
             <Button
               primary
               size="small"
+              plain={false}
               fill="horizontal"
-              label="Start"
               onClick={() => dispatch({ type: 'startCount' })}
+              icon={<PlayFill />}
               margin={{ right: 'small' }}
             />
             <Button
               secondary
               size="small"
               fill="horizontal"
-              label="Stop"
+              plain={false}
+              icon={<PauseFill />}
               onClick={() => dispatch({ type: 'stopCount' })}
             />
           </Box>
         </Box>
+      </Box>
+      {state.names.length ? (
+        <Box margin={{ bottom: 'medium' }}>
+          <Heading level="1" weight="bold" size="xlarge">
+            {state.names[0].name}
+          </Heading>
+
+          <Box direction="row" margin={{ top: 'small' }}>
+            <Button
+              secondary
+              size="small"
+              fill="horizontal"
+              label="Clear"
+              onClick={() => dispatch({ type: 'resetNames' })}
+              margin={{ right: 'small' }}
+            />
+            <Button
+              primary
+              size="small"
+              fill="horizontal"
+              label="Next"
+              onClick={() => handleRemoveName(state.names[0].name)}
+            />
+          </Box>
+        </Box>
+      ) : null}
+      <Box
+        direction="row"
+        width="large"
+        align="start"
+        justify="evenly"
+        height="medium"
+        wrap={true}
+      >
+        {state.names.slice(1).map(({ name }) => (
+          <Box
+            basis="auto"
+            round="medium"
+            direction="row"
+            background="light-1"
+            pad="small"
+            margin={{ right: 'small' }}
+            align="center"
+            onClick={() => handleRemoveName(name)}
+          >
+            <Avatar
+              src={`https://avatars.dicebear.com/4.5/api/gridy/${name.replace(
+                ' ',
+                '_'
+              )}.svg`}
+              alt="avatar"
+              background="brand"
+            />
+            <Text weight="bold" size="medium">
+              {name}
+            </Text>
+          </Box>
+        ))}
       </Box>
     </Main>
   );
