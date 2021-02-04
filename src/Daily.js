@@ -67,7 +67,7 @@ function Daily(props) {
 
   useEffect(() => {
     async function fetchNames(binId) {
-      const res = await fetch(`https://api.jsonbin.io/b/${binId}`).then((x) =>
+      const res = await fetch(`https://api.jsonbin.io/b${binId}`).then((x) =>
         x.json()
       );
       dispatch({
@@ -80,7 +80,7 @@ function Daily(props) {
 
     const id = window.location.pathname;
     if (id.length > 1) {
-      fetchNames('601268d49f55707f6dfd1b22');
+      fetchNames(id);
     }
   }, []);
 
