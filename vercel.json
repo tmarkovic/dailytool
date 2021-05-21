@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/echo.js": {
-      "memory": 3008,
+      "memory": 512,
       "maxDuration": 3
     }
   }
