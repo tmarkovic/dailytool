@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   TextInput,
-  Main,
   FormField,
   Text,
   Heading,
@@ -13,7 +12,8 @@ import {
 } from 'grommet';
 import { PauseFill, PlayFill } from 'grommet-icons';
 import { Add } from 'grommet-icons';
-
+import { useParams} from 'react-router-dom';
+import * as queryString from 'query-string';
 const initialState = {
   names: [],
   countdown: false,
@@ -57,30 +57,34 @@ function reducer(state, { type, payload }) {
 }
 
 function Daily(props) {
-  console.log(props);
   const [state, dispatch] = useReducer(reducer, initialState);
   const [name, setName] = useState('');
-
   const handleChangeName = (event) => {
     setName(event.target.value);
   };
-
+  let { slug } = useParams();
+  console.log(slug);
   useEffect(() => {
-    async function fetchNames(binId) {
-      const res = await fetch(`https://api.jsonbin.io/b${binId}`).then((x) =>
-        x.json()
-      );
+    // async function fetchNames(binId) {
+    //   const res = await fetch(`https://api.jsonbin.io/b${binId}`).then((x) =>
+    //     x.json()
+    //   );
+    //   dispatch({
+    //     type: 'addNames',
+    //     payload: res.names
+    //       .map((name) => ({ name, selected: false }))
+    //       .sort(() => 0.5 - Math.random()),
+    //   });
+    // }
+    const {names} = queryString.parse(window.location.search, { arrayFormat: 'comma' });
+    if (Boolean(names)) {
+      console.log(names);
       dispatch({
         type: 'addNames',
-        payload: res.names
+        payload: names
           .map((name) => ({ name, selected: false }))
           .sort(() => 0.5 - Math.random()),
       });
-    }
-
-    const id = window.location.pathname;
-    if (id.length > 1) {
-      fetchNames(id);
     }
   }, []);
 
@@ -103,7 +107,7 @@ function Daily(props) {
   };
 
   return (
-    <Main pad="small" fill align="center">
+    <>
       <Box direction="row">
         <Box direction="column" width="medium">
           <p>Participants</p>
@@ -191,6 +195,7 @@ function Daily(props) {
             direction="row"
             background="light-1"
             pad="small"
+            key={name}
             margin={{ right: 'small' }}
             align="center"
             onClick={() => handleRemoveName(name)}
@@ -209,7 +214,7 @@ function Daily(props) {
           </Box>
         ))}
       </Box>
-    </Main>
+</>
   );
 }
 
