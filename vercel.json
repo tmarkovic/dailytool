@@ -1,8 +1,11 @@
 {
   "functions": {
-    "api/echo.js": {
+    "api/channels.js": {
       "memory": 512,
       "maxDuration": 3
     }
+  },
+  "env": {
+    "ABLY_PRIVATE_KEY": "@ably-private-key"
   }
 }

@@ -1,14 +1,12 @@
-import { Grommet,Main } from "grommet";
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
+import "./index.css";
 import Daily from "./Daily";
-import { grommet } from "grommet/themes";
 ReactDOM.render(
   <React.StrictMode>
-    <Grommet theme={grommet} full>
-    <Main pad="small" fill align="center">
+    <div className="container mx-auto flex flex-col items-center">
       <Router>
         <Switch>
           <Route exact path="/daily">
@@ -19,8 +17,7 @@ ReactDOM.render(
           </Route>
         </Switch>
       </Router>
-      </Main>
-    </Grommet>
+    </div>
   </React.StrictMode>,
   document.getElementById("root")
 );

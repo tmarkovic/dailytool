@@ -1,19 +1,8 @@
-import './index.css';
-import { useReducer, useState, useEffect } from 'react';
-import {
-  Clock,
-  Box,
-  Button,
-  TextInput,
-  FormField,
-  Text,
-  Heading,
-  Avatar,
-} from 'grommet';
-import { PauseFill, PlayFill } from 'grommet-icons';
-import { Add } from 'grommet-icons';
-import { useParams} from 'react-router-dom';
-import * as queryString from 'query-string';
+import "./index.css";
+import { useReducer, useState, useEffect } from "react";
+import * as queryString from "query-string";
+import { v4 as uuidv4 } from "uuid";
+import CountDown from "./CountDown";
 const initialState = {
   names: [],
   countdown: false,
@@ -21,200 +10,141 @@ const initialState = {
 
 function reducer(state, { type, payload }) {
   switch (type) {
-    case 'addName':
+    case "addName":
       return {
         ...state,
-        names: [...state.names, { name: payload.trim(), selected: false }],
+        names: [
+          ...state.names,
+          {
+            name: payload.name.trim(),
+            id: payload.id,
+            selected: payload.selected,
+          },
+        ],
       };
-    case 'addNames':
+    case "addNames":
       return {
         ...state,
         names: [...state.names, ...payload],
       };
-    case 'removeName':
+    case "removeName":
       return {
         ...state,
-        names: state.names.filter((x) => x.name !== payload),
+        names: state.names.filter((x) => x.id !== payload),
       };
-    case 'resetNames':
+    case "resetNames":
       return {
         ...state,
         names: [],
-      };
-    case 'startCount':
-      return {
-        ...state,
-        countdown: 'backward',
-      };
-    case 'stopCount':
-      return {
-        ...state,
-        countdown: false,
       };
     default:
       throw new Error();
   }
 }
 
+const mapName = (name) => ({
+  name: name.trim(),
+  selected: false,
+  id: uuidv4(),
+});
+
 function Daily(props) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const handleChangeName = (event) => {
     setName(event.target.value);
   };
-  let { slug } = useParams();
-  console.log(slug);
   useEffect(() => {
-    // async function fetchNames(binId) {
-    //   const res = await fetch(`https://api.jsonbin.io/b${binId}`).then((x) =>
-    //     x.json()
-    //   );
-    //   dispatch({
-    //     type: 'addNames',
-    //     payload: res.names
-    //       .map((name) => ({ name, selected: false }))
-    //       .sort(() => 0.5 - Math.random()),
-    //   });
-    // }
-    const {names} = queryString.parse(window.location.search, { arrayFormat: 'comma' });
+    const { names } = queryString.parse(window.location.search, {
+      arrayFormat: "comma",
+    });
     if (Boolean(names)) {
       console.log(names);
       dispatch({
-        type: 'addNames',
-        payload: names
-          .map((name) => ({ name, selected: false }))
-          .sort(() => 0.5 - Math.random()),
+        type: "addNames",
+        payload: names.map(mapName).sort(() => 0.5 - Math.random()),
       });
     }
   }, []);
 
   const handleAddName = (e) => {
     e.preventDefault();
-    if (name.includes(',')) {
+    if (name.includes(",")) {
       const names = name
-        .split(',')
-        .map((x) => ({ name: x.trim(), selected: false }))
+        .split(",")
+        .map(mapName)
         .sort(() => 0.5 - Math.random());
-      dispatch({ type: 'addNames', payload: names });
+      dispatch({ type: "addNames", payload: names });
     } else {
-      dispatch({ type: 'addName', payload: name });
+      dispatch({ type: "addName", payload: mapName(name) });
     }
-    setName('');
+    setName("");
   };
 
   const handleRemoveName = (value) => {
-    dispatch({ type: 'removeName', payload: value });
+    dispatch({ type: "removeName", payload: value });
   };
 
+  const [current, ...rest] = state?.names;
+  console.log(rest);
   return (
     <>
-      <Box direction="row">
-        <Box direction="column" width="medium">
-          <p>Participants</p>
+      <div className="flex flex-row ">
+        <div className="flex flex-col" width="medium">
+          <p className="text-4xl self-start">Participants</p>
           <form onSubmit={handleAddName}>
-            <Box direction="row">
-              <FormField>
-                <TextInput value={name} onChange={handleChangeName} />
-              </FormField>
-              <Button
+            <div direction="row">
+              <input type="text" value={name} onChange={handleChangeName} />
+              <button
                 type="submit"
-                icon={<Add />}
-                disabled={name === ''}
+                disabled={name === ""}
                 onClick={handleAddName}
-              ></Button>
-            </Box>
+              ></button>
+            </div>
           </form>
-        </Box>
-        <Box>
-          <p>Timer</p>
-          <Clock
+        </div>
+        <div>
+          <p className="text-4xl">Timer</p>
+          {/* <Clock
             type="digital"
             time="PT0H15M0S"
             run={state.countdown}
             hourLimit="24"
             size="xxlarge"
-          />
-          <Box direction="row" margin={{ top: 'small' }}>
-            <Button
-              primary
-              size="small"
-              plain={false}
-              fill="horizontal"
-              onClick={() => dispatch({ type: 'startCount' })}
-              icon={<PlayFill />}
-              margin={{ right: 'small' }}
-            />
-            <Button
-              secondary
-              size="small"
-              fill="horizontal"
-              plain={false}
-              icon={<PauseFill />}
-              onClick={() => dispatch({ type: 'stopCount' })}
-            />
-          </Box>
-        </Box>
-      </Box>
+          /> */}
+          <CountDown minutes="15" />
+        </div>
+      </div>
       {state.names.length ? (
-        <Box margin={{ bottom: 'medium' }}>
-          <Heading level="1" weight="bold" size="xlarge">
-            {state.names[0].name}
-          </Heading>
+        <div margin={{ bottom: "medium" }}>
+          <h1 className="text-6xl capitalize">{current.name}</h1>
 
-          <Box direction="row" margin={{ top: 'small' }}>
-            <Button
+          <div direction="row" margin={{ top: "small" }}>
+            <button
               secondary
-              size="small"
-              fill="horizontal"
-              label="Clear"
-              onClick={() => dispatch({ type: 'resetNames' })}
-              margin={{ right: 'small' }}
+              onClick={() => dispatch({ type: "resetNames" })}
             />
-            <Button
-              primary
-              size="small"
-              fill="horizontal"
-              label="Next"
-              onClick={() => handleRemoveName(state.names[0].name)}
-            />
-          </Box>
-        </Box>
+            <button onClick={() => handleRemoveName(state.names[0].name)} />
+          </div>
+        </div>
       ) : null}
-      <Box
-        direction="row"
-        width="large"
-        align="start"
-        justify="evenly"
-        height="medium"
-        wrap={true}
-      >
-        {state.names.slice(1).map(({ name }) => (
-          <Box
-            basis="auto"
-            round="medium"
-            direction="row"
-            background="light-1"
-            pad="small"
-            key={name}
-            margin={{ right: 'small' }}
-            align="center"
-            onClick={() => handleRemoveName(name)}
+      <div className="flex flex-row">
+        {rest.map(({ name, id }) => (
+          <div
+            className="flex flex-row p-4 mr-1 bg-gray-300 w-auto items-center rounded-lg"
+            key={id}
+            onClick={() => handleRemoveName(id)}
           >
-            <Avatar
-              src={`https://avatars.dicebear.com/4.5/api/gridy/${name.replace(
-                ' ',
-                '_'
-              )}.svg`}
+            <img
+              src={`https://avatars.dicebear.com/4.5/api/gridy/${id}.svg`}
               alt="avatar"
-              background="brand"
+              width="48px"
             />
-            <Text weight="bold" size="medium">
-              {name}
-            </Text>
-          </Box>
+            <span className="font-semibold capitalize">{name}</span>
+          </div>
         ))}
-      </Box>
-</>
+      </div>
+    </>
   );
 }
 
