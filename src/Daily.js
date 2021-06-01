@@ -1,8 +1,8 @@
-import "./index.css";
 import { useReducer, useState, useEffect } from "react";
 import * as queryString from "query-string";
 import { v4 as uuidv4 } from "uuid";
-import CountDown from "./CountDown";
+import Header from "./Header";
+import Footer from "./Footer";
 const initialState = {
   names: [],
   countdown: false,
@@ -85,64 +85,65 @@ function Daily(props) {
     dispatch({ type: "removeName", payload: value });
   };
 
-  const [current, ...rest] = state?.names;
-  console.log(rest);
+  const [current, ...rest] = state?.names.slice(0, 4);
+
   return (
     <>
-      <div className="flex flex-row ">
-        <div className="flex flex-col" width="medium">
-          <p className="text-4xl self-start">Participants</p>
-          <form onSubmit={handleAddName}>
-            <div direction="row">
-              <input type="text" value={name} onChange={handleChangeName} />
-              <button
-                type="submit"
-                disabled={name === ""}
-                onClick={handleAddName}
-              ></button>
-            </div>
-          </form>
-        </div>
-        <div>
-          <p className="text-4xl">Timer</p>
-          {/* <Clock
-            type="digital"
-            time="PT0H15M0S"
-            run={state.countdown}
-            hourLimit="24"
-            size="xxlarge"
-          /> */}
-          <CountDown minutes="15" />
-        </div>
-      </div>
-      {state.names.length ? (
-        <div margin={{ bottom: "medium" }}>
-          <h1 className="text-6xl capitalize">{current.name}</h1>
-
-          <div direction="row" margin={{ top: "small" }}>
-            <button
-              secondary
-              onClick={() => dispatch({ type: "resetNames" })}
-            />
-            <button onClick={() => handleRemoveName(state.names[0].name)} />
-          </div>
-        </div>
-      ) : null}
-      <div className="flex flex-row">
-        {rest.map(({ name, id }) => (
-          <div
-            className="flex flex-row p-4 mr-1 bg-gray-300 w-auto items-center rounded-lg"
-            key={id}
-            onClick={() => handleRemoveName(id)}
-          >
+      <Header />
+      <div className="container mx-auto w-full flex flex-col h-full items-center">
+        {state.names.length ? (
+          <div className="flex flex-row my-44 items-center place-items-center flex-shrink">
             <img
-              src={`https://avatars.dicebear.com/4.5/api/gridy/${id}.svg`}
+              src={`https://avatars.dicebear.com/4.5/api/human/${current.id}.svg`}
               alt="avatar"
-              width="48px"
+              className="w-48 h-48 mr-8"
             />
-            <span className="font-semibold capitalize">{name}</span>
+            <h1 className="capitalize text-9xl">{current.name}</h1>
           </div>
-        ))}
+        ) : null}
+        <div className="flex flex-wrap flex-row-reverse">
+          {rest.map(({ name, id }, i) => (
+            <div
+              className="flex flex-col p-2 mr-1 w-auto items-center"
+              key={id}
+              onClick={() => handleRemoveName(id)}
+            >
+              <img
+                src={`https://avatars.dicebear.com/4.5/api/human/${id}.svg`}
+                alt="avatar"
+                className="rounded-full p-4 border-4 border-bg-base w-24 h-24"
+              />
+              <span className="capitalize font-medium text-base text-black max-w-[12ch] text-center">
+                {name}
+              </span>
+            </div>
+          ))}
+        </div>
+        {/* <form onSubmit={handleAddName} className="">
+            <div className="form-control">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Add participant"
+                  value={name}
+                  onChange={handleChangeName}
+                  className="w-full pr-16 input input-bordered"
+                />
+                <button
+                  type="submit"
+                  disabled={name === ""}
+                  onClick={handleAddName}
+                  className="absolute right-0 top-0 rounded-l-none btn btn-primary"
+                >
+                  go
+                </button>
+              </div>
+            </div>
+          </form> */}
+
+        <div className="mt-auto h-24">
+          <Footer />
+        </div>
       </div>
     </>
   );

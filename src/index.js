@@ -2,11 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
-import "./index.css";
 import Daily from "./Daily";
+import "./index.css";
+
 ReactDOM.render(
   <React.StrictMode>
-    <div className="container mx-auto flex flex-col items-center">
+    <div className="flex flex-col h-screen w-full">
       <Router>
         <Switch>
           <Route exact path="/daily">
