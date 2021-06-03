@@ -1,97 +1,38 @@
-import { useReducer, useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux'
+import { addNames, removeName, participantsSelector, resetNames } from './reducer'
 import * as queryString from "query-string";
 import { v4 as uuidv4 } from "uuid";
 import Header from "./Header";
 import Footer from "./Footer";
-const initialState = {
-  names: [],
-  countdown: false,
-};
 
-function reducer(state, { type, payload }) {
-  switch (type) {
-    case "addName":
-      return {
-        ...state,
-        names: [
-          ...state.names,
-          {
-            name: payload.name.trim(),
-            id: payload.id,
-            selected: payload.selected,
-          },
-        ],
-      };
-    case "addNames":
-      return {
-        ...state,
-        names: [...state.names, ...payload],
-      };
-    case "removeName":
-      return {
-        ...state,
-        names: state.names.filter((x) => x.id !== payload),
-      };
-    case "resetNames":
-      return {
-        ...state,
-        names: [],
-      };
-    default:
-      throw new Error();
-  }
-}
-
-const mapName = (name) => ({
+const mapName = (name: string) => ({
   name: name.trim(),
   selected: false,
   id: uuidv4(),
 });
 
-function Daily(props) {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const [name, setName] = useState("");
-  const handleChangeName = (event) => {
-    setName(event.target.value);
-  };
+function Daily() {
+  const dispatch = useDispatch()
+  const names = useSelector(participantsSelector)
+  console.log(names);
+
   useEffect(() => {
     const { names } = queryString.parse(window.location.search, {
       arrayFormat: "comma",
     });
     if (Boolean(names)) {
-      console.log(names);
-      dispatch({
-        type: "addNames",
-        payload: names.map(mapName).sort(() => 0.5 - Math.random()),
-      });
+      dispatch(addNames((names as string[]).map(mapName).sort(() => 0.5 - Math.random())))
     }
-  }, []);
+  }, [dispatch]);
 
-  const handleAddName = (e) => {
-    e.preventDefault();
-    if (name.includes(",")) {
-      const names = name
-        .split(",")
-        .map(mapName)
-        .sort(() => 0.5 - Math.random());
-      dispatch({ type: "addNames", payload: names });
-    } else {
-      dispatch({ type: "addName", payload: mapName(name) });
-    }
-    setName("");
-  };
-
-  const handleRemoveName = (value) => {
-    dispatch({ type: "removeName", payload: value });
-  };
-
-  const [current, ...rest] = state?.names.slice(0, 4);
+  const [current, ...rest] = names?.slice(0, 4);
 
   return (
     <>
       <Header />
       <div className="container mx-auto w-full flex flex-col h-full items-center">
-        {state.names.length ? (
+        {names.length ? (
           <div className="flex flex-row my-44 items-center place-items-center flex-shrink">
             <img
               src={`https://avatars.dicebear.com/4.5/api/human/${current.id}.svg`}
@@ -106,7 +47,7 @@ function Daily(props) {
             <div
               className="flex flex-col p-2 mr-1 w-auto items-center"
               key={id}
-              onClick={() => handleRemoveName(id)}
+              onClick={() => dispatch(removeName(id))}
             >
               <img
                 src={`https://avatars.dicebear.com/4.5/api/human/${id}.svg`}
@@ -142,7 +83,10 @@ function Daily(props) {
           </form> */}
 
         <div className="mt-auto h-24">
-          <Footer />
+          <Footer
+            onNext={() => dispatch(removeName(names[0].id))}
+            onReset={() => dispatch(resetNames())}
+          />
         </div>
       </div>
     </>

@@ -1,20 +1,21 @@
 import React from "react";
 
-const Footer = ({}) => {
+type FooterProps = {
+  onReset: Function;
+  onNext: Function;
+}
+
+const Footer = ({ onReset, onNext }: FooterProps) => {
   return (
     <div className="flex">
       <button
         className="btn btn-secondary btn-outline mr-2"
-        secondary
         value="Reset"
-        // onClick={() => dispatch({ type: "resetNames" })}
+        onClick={() => onReset()}
       >
         reset
       </button>
-      <button
-        className="btn btn-primary"
-        // onClick={() => handleRemoveName(state.names[0].id)}
-      >
+      <button className="btn btn-primary" onClick={() => onNext()}>
         next
       </button>
     </div>
