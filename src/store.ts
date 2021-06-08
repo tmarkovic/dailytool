@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { useDispatch, TypedUseSelectorHook, useSelector } from 'react-redux'
 import DailyReducer from './daily/reducer';
+import TimeReducer from './time/reducer';
 
 export const store = configureStore({
   reducer: {
     daily: DailyReducer,
+    time: TimeReducer
   },
 })
 

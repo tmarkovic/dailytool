@@ -1,24 +1,38 @@
-import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setTimerState, timerSelector, TimerState } from "../time/reducer";
+import { pop } from "./reducer";
 
-type FooterProps = {
-  onReset: Function;
-  onNext: Function;
-}
 
-const Footer = ({ onReset, onNext }: FooterProps) => {
+
+const Footer = () => {
+  const time = useSelector(timerSelector, (l, s) => {
+    return l.timerState === s.timerState;
+  })
+  const isRunning = time.timerState === 'RUNNING'
+  const dispatch = useDispatch();
+  const getIcon = (s: TimerState) => {
+    switch (s) {
+      case 'PRISTINE': return 'start'
+      case 'RUNNING': return 'pause'
+      case 'PAUSED': return 'resume'
+    }
+  }
+  function handlePlayPause() {
+    if (isRunning) {
+      dispatch(setTimerState('PAUSED'))
+    } else {
+      dispatch(setTimerState('RUNNING'))
+    }
+  }
   return (
     <div className="flex">
-      <button
-        className="btn btn-secondary btn-outline mr-2"
-        value="Reset"
-        onClick={() => onReset()}
-      >
-        reset
+      <button className="btn btn-outline mr-2" onClick={handlePlayPause}>
+        {getIcon(time.timerState)}
       </button>
-      <button className="btn btn-primary" onClick={() => onNext()}>
+      <button className="btn btn-outline mr-2" onClick={() => dispatch(pop())}>
         next
       </button>
-    </div>
+    </div >
   );
 };
 
