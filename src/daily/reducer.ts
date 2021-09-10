@@ -36,17 +36,25 @@ const participants = createSlice({
   },
 })
 
-const startedTime = createSlice({
-  name: 'startedTime',
-  initialState: '',
+const dailyStartedTime = createSlice({
+  name: 'dailyStartedTime',
+  initialState: 0,
   reducers: {
-    setStartedTime: (state, { payload }: PayloadAction) => payload
+    setDailyStartedTime: (state, { payload }: PayloadAction<number>) => payload
+  }
+})
+
+const participantStartTime = createSlice({
+  name: 'participantStartTime',
+  initialState: 0,
+  reducers: {
+    setParticipantStartedTime: (state, { payload }: PayloadAction<number>) => payload
   }
 })
 
 export default combineReducers({
   [participants.name]: participants.reducer,
-  [startedTime.name]: startedTime.reducer
+  [participantStartTime.name]: participantStartTime.reducer
 })
 
 
@@ -57,5 +65,7 @@ export const shuffle = createAsyncThunk('participants/shuffle', (_, { getState, 
   dispatch(loadNames(newState))
 })
 export const { addNames, removeName, resetNames, pop, loadNames } = participants.actions
-export const { setStartedTime } = startedTime.actions
+export const { setParticipantStartedTime } = participantStartTime.actions
+export const { setDailyStartedTime } = dailyStartedTime.actions
 export const participantsSelector = (state: RootState) => state.daily.participants
+export const currentStartTimeSelector = (state: RootState) => state.daily.participantStartTime
