@@ -1,24 +1,26 @@
 
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { formatTime } from '../utils'
 
-import { decrementDuration, durationSelector, isRunningSelector } from './reducer'
+import { durationSelector, isRunningSelector, startTimeSelector } from './reducer'
 
 export default function Timer() {
-  // const [increment, _] = useState(false)
-  const duration = useSelector(durationSelector)
-  const isRunning = useSelector(isRunningSelector)
-  const dispatch = useDispatch()
+  const duration = useSelector(durationSelector) * 1000;
+  const isRunning = useSelector(isRunningSelector);
+  const startTime = useSelector(startTimeSelector);
+
+  let [remainder, setRemainder] = useState(duration)
 
   useEffect(() => {
     if (isRunning && duration > 0) {
       const interval = setInterval(() => {
-        dispatch(decrementDuration())
-      }, 1000);
+        const timeLeft = duration - (Date.now() - startTime);
+        setRemainder(timeLeft);
+      }, 50);
       return () => clearInterval(interval);
     }
-  }, [isRunning, dispatch, duration]);
-  return <h1>{formatTime(duration * 1000)}</h1>
+  }, [isRunning, startTime, duration]);
+  return <h1>{formatTime(remainder).combined}</h1>
 
 }
